@@ -20,7 +20,7 @@ I designed a 3D-printed case in Autodesk Fusion based on measurements of the e-i
 
 ### The App
 
-My idea for the app was to have a very simple list of stations that I can easily scroll through and select a station, then tap the display to update the station. I decided to pre-generate the images to simplify the app. This does reduce the flexibility of the app, but the point was to make it simple and quick to use. The Waveshare app could still be used to add custom text or images when needed, or you could create your own BMPs and recompile the app.
+My idea for the app was to have a very simple list of stations that I can easily scroll through and select a station, then tap the display to update the station. I decided to pre-generate the images to simplify the app. This does reduce the flexibility of the app, but the point was to make it simple and quick to use. The Waveshare app could still be used to add custom text or images when needed, or you could create your own BMPs and recompile the app. I installed the app via the debug interface in Android Studio. Making an APK is left as an exercise to the reader, or for future me.
 
 ## Notes
 
