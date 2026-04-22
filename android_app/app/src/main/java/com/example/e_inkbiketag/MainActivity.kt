@@ -37,6 +37,7 @@ class MainActivity : ComponentActivity() {
     private var selectedItem: ImageItem? = null
     private var selectedBitmap: Bitmap? = null
     private lateinit var statusText: TextView
+    private lateinit var placeholderText: TextView
     private lateinit var previewImage: ImageView
     private lateinit var nfcAdapter: NfcAdapter
     private var isWriting = false
@@ -54,6 +55,7 @@ class MainActivity : ComponentActivity() {
         }
 
         statusText = findViewById(R.id.statusText)
+        placeholderText = findViewById(R.id.placeholderText)
         previewImage = findViewById(R.id.previewImage)
         nfcAdapter = NfcAdapter.getDefaultAdapter(this)
 
@@ -96,14 +98,7 @@ class MainActivity : ComponentActivity() {
                 selectedBitmap = bitmap
                 previewImage.setImageBitmap(bitmap)
                 previewImage.visibility = View.VISIBLE
-                
-                // Scroll to the selected item to keep it visible
-                val selectedPos = images.indexOf(selected)
-                if (selectedPos != -1) {
-                    recyclerView.post {
-                        recyclerView.smoothScrollToPosition(selectedPos)
-                    }
-                }
+                placeholderText.visibility = View.GONE
             }
         }
     }
