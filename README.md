@@ -1,6 +1,6 @@
 # E-Ink Bike Tag for Caltrain
 
-<img src="photos/PXL_20260415_230328032.jpg" width="400" alt="Bike Tag Photo">
+<img src="photos/PXL_20260415_230328032.jpg" width="400" alt="Bike Tag Photo"> <img src="photos/PXL_20260422_041624829.jpg" width="400" alt="Bike Tag Photo 2">
 
 ## What is this project?
 
@@ -15,6 +15,8 @@ This project was inspired by my ridership patterns on Caltrain - fairly frequent
 ### [The Display](<e-ink display/README.md>)
 
 The display is a Waveshare 2.7" parasitic-NFC-powered e-ink display. It uses power from your phone via NFC and updates the content on the screen. The resolution of 264 x 176 pixels is enough for a few lines of text.
+
+<img src="https://www.waveshare.com/w/upload/thumb/5/55/2.7inch-NFC-Powered-e-Paper-Module-3.jpg/300px-2.7inch-NFC-Powered-e-Paper-Module-3.jpg" width="400" alt="Waveshare Display">
 
 ### [The Case](case/README.md)
 

@@ -37,3 +37,15 @@ An Android application designed to update E-Ink displays (tags) via NFC. It allo
 * **Language**: Kotlin
 * **UI**: XML Layouts with `ComponentActivity`
 * **Dependencies**: AndroidX, Material Design, RecyclerView
+
+## Driving the Waveshare NFC E-Ink Display
+
+Getting the Waveshare 2.7" NFC e-paper display to work from Android turned out to be a journey through several layers of the stack.
+
+The obvious starting point was Waveshare's own Android SDK JAR. The main handler class is package-private with obfuscated method names, so we wrapped it in a thin `WaveShareHandler` class to expose a clean interface. This worked for the older tag firmware, but the new tag revision the hardware shipped with wasn't supported by the SDK.
+
+With the SDK ruled out, Waveshare provided the raw driver command specification directly. We wrote `EpdWriter` to implement these commands from scratch. The first attempt used `NfcA.transceive()` — the low-level ISO 14443-3 interface — but every single command failed immediately with `TagLostException`. After ruling out timing and power-harvesting issues, the real problem became clear: the commands are structured as ISO 7816-4 APDUs (`CLA INS P1 P2` format), which need to go through `IsoDep`, not `NfcA`. Switching the transport layer fixed the communication entirely.
+
+The display sequence itself then needed two more corrections. The hardware reset command (`RST LOW`) kills the NFC interface from the inside — it literally resets the chip providing RF power — so it has to be skipped entirely when operating over NFC. And the bitmap pipeline needed fixes on three fronts: color inversion (1=black, not white), 90° rotation (the controller scans in portrait orientation despite the landscape physical layout), and LSB-first bit packing within each byte rather than MSB-first.
+
+Once all of that was sorted, the full init → image transfer → busy-poll refresh cycle completed cleanly in about 4 seconds over NFC.
