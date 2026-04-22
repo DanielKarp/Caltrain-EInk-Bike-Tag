@@ -1,0 +1,10 @@
+[project]
+name = "E-Ink_Bike_Tag_BMP_Generator"
+version = "0.1.0"
+description = "Simple Script that generates BMPs from a list with the correct filenames for the android app to use"
+readme = "README.md"
+requires-python = ">=3.13"
+dependencies = [
+    "pillow>=12.2.0",
+    "pyyaml>=6.0.3",
+]

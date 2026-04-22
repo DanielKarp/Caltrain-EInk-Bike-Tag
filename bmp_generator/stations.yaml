@@ -1,0 +1,61 @@
+stations:
+  - name: "San Francisco"
+    color: Red
+  - name: "22nd St"
+    color: Red
+  - name: "Bayshore"
+  - name: "South SF"
+    color: Red
+  - name: "San Bruno"
+  - name: "Millbrae"
+    color: Red
+  - name: "Broadway"
+    color: Violet
+  - name: "Burlin\ngame"
+    display_name: "Burlingame"
+  - name: "San Mateo"
+    color: Red
+  - name: "Hayward Park"
+  - name: "Hillsdale"
+    color: Red
+  - name: "Belmont"
+  - name: "San Carlos"
+  - name: "Redwood City"
+    color: Red
+  - name: "Menlo Park"
+    color: Blue
+  - name: "Palo Alto"
+    color: Red
+  - name: "California Ave"
+    color: Blue
+  - name: "San Antonio"
+    color: Blue
+  - name: "Mountain View"
+    color: Red
+  - name: "Sunnyvale"
+    color: Red
+  - name: "Lawrence"
+    color: Blue
+  - name: "Santa Clara"
+    color: Blue
+  - name: "College Park"
+    color: Violet
+  - name: "San Jose"
+    color: Red
+  - name: "Tamien"
+    color: Green
+  - name: "Capitol"
+    color: Yellow
+  - name: "Blossom Hill"
+    color: Yellow
+  - name: "Morgan Hill"
+    color: Yellow
+  - name: "San Martin"
+    color: Yellow
+  - name: "Gilroy"
+    color: Yellow
+  - name: "Nowhere In Particular"
+  - name: Not in Service
+  - name: Test
+  - name: "discord.gg\n/bayarea\ntransit"
+    display_name: Discord
