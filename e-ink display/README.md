@@ -6,4 +6,3 @@ The display is a Waveshare 2.7" parasitic-NFC-powered e-ink display. It uses tec
 
 [Waveshare Website](https://www.waveshare.com/wiki/2.7inch_NFC-Powered_e-Paper_Module)
 [Amazon Link](https://www.amazon.com/dp/B08B3RG439)
-
