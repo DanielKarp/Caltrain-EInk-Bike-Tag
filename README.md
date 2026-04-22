@@ -16,11 +16,11 @@ The display is a Waveshare 2.7" parasitic-NFC-powered e-ink display. It uses pow
 
 ### The Case
 
-I designed a 3D-printed case in Autodesk Fusion based on measurements of the e-ink display PCB and measurements on Waveshare's website. It consists of a top lid and a bottom base which is screwed together with a M3x20mm screw with a nut and washer holding the PCB against the top lid and press-fit nuts (I used a little bit of heat to make insertion easier, but didn't have any heat-set inserts on hand) in the base holding everything together. The base has two slots in the to allow leave room for a velcro strap.
+I designed a 3D-printed case in Autodesk Fusion based on measurements of the e-ink display PCB and specifications from Waveshare's website. The case consists of a top lid and bottom base secured with an M3×20mm screw, nut, and washers that hold the PCB against the lid. Press-fit nuts embedded in the base hold everything together (I used gentle heat to make insertion easier, because I did not have any heat-set inserts on hand). The base also includes two slots for a velcro strap to secure the case to a bike.
 
 ### The App
 
-My idea for the app was to have a very simple list of stations that I can easily scroll through and select a station, then tap the display to update the station. I decided to pre-generate the images to simplify the app. This does reduce the flexibility of the app, but the point was to make it simple and quick to use. The Waveshare app could still be used to add custom text or images when needed, or you could create your own BMPs and recompile the app. I installed the app via the debug interface in Android Studio. Making an APK is left as an exercise to the reader, or for future me.
+The app provides a simple interface: scroll through a list of stations, select one, and tap the display to update it. I pre-generated the images to keep the app simple and performant, which reduces flexibility but keeps it quick and easy to use. The Waveshare app is still available if you need custom text or images, or you can create your own BMPs and recompile the app. Currently, the app is installed via the Android Studio debug interface; building a distribution APK is left as an exercise for the reader (or future me).
 
 ## Notes
 

@@ -24,4 +24,4 @@ Both parts are printed with the outside flat face down for a consistent surface 
 
 ## Notes
 
-The nuts I used may be a slightly different external dimensions than mine, so you may need to modify the hexagonal cutout to fit your hardware. You could also use a cap nut with a slightly longer bolt.
+The nuts you use may have slightly different external dimensions than mine, so you may need to modify the hexagonal cutout to fit your hardware. Alternatively, you could use a cap nut with a slightly longer bolt.
