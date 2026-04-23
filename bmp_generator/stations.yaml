@@ -57,5 +57,12 @@ stations:
   - name: "Nowhere In Particular"
   - name: Not in Service
   - name: Test
-  - name: "discord.gg\n/bayarea\ntransit"
+  - name: "Discord Server"
     display_name: Discord
+    qr: discord.gg/bayareatransit
+    color: Violet
+  - name: "GitHub Repo"
+    display_name: GitHub
+    qr: https://github.com/DanielKarp/Caltrain-EInk-Bike-Tag
+    color: Violet
+    
