@@ -9,15 +9,22 @@ YAML schema (stations.yaml):
                                         # name (newlines stripped)
       color: red                        # optional – one of: red, orange, yellow,
                                         #   green, blue, indigo, violet
+      qr: "https://example.com"         # optional – URL/data to encode as a QR code.
+                                        #   When present, a QR code (v6, EC-M) is
+                                        #   placed on the left and the name text is
+                                        #   placed on the right.
 
 File names are written as:
   <zero-padded index>_<color initial if set>_<display name>.bmp
   e.g.  07_R_Millbrae.bmp  or  00_SanFrancisco.bmp
 """
 
-from PIL import Image, ImageDraw, ImageFont
 import os
+
+import qrcode
 import yaml
+from PIL import Image, ImageDraw, ImageFont
+from qrcode.constants import ERROR_CORRECT_M
 
 # ── Configuration ────────────────────────────────────────────────────────────
 IMG_W, IMG_H = 264, 176
@@ -25,13 +32,21 @@ PADDING = 12
 OUTPUT_DIR = "output"
 STATIONS_FILE = "stations.yaml"
 
+# QR layout constants (Version 6, 3 px/module, 4-module quiet zone each side)
+# Total pixel size: (41 data modules + 8 quiet-zone modules) × 3 px = 147 px
+QR_VERSION = 6
+QR_BOX_SIZE = 3  # px per module
+QR_BORDER = 4  # quiet-zone modules (standard minimum)
+QR_SIZE = (17 + 4 * QR_VERSION + QR_BORDER * 2) * QR_BOX_SIZE  # = 147 px
+QR_COL_GAP = 8  # gap between QR image and text column
+
 # Recognised ROYGBIV color names → their single-character file prefix
 COLOR_INITIALS: dict[str, str] = {
-    "Red":    "R",
+    "Red": "R",
     "Orange": "O",
     "Yellow": "Y",
-    "Green":  "G",
-    "Blue":   "B",
+    "Green": "G",
+    "Blue": "B",
     "Indigo": "I",
     "Violet": "V",
 }
@@ -68,7 +83,7 @@ def build_filename(index: int, station: dict) -> str:
     """
     display_name = station.get("display_name") or station["name"].replace("\n", "")
     color = station.get("color")
-    color_prefix = COLOR_INITIALS[color.capitalize()] + '_' if color else ""
+    color_prefix = COLOR_INITIALS[color.capitalize()] + "_" if color else ""
     return f"{index:02d}_{color_prefix}{display_name}.bmp"
 
 
@@ -121,9 +136,17 @@ def fit_font(
     return best
 
 
+def _to_bw(img: Image.Image) -> Image.Image:
+    """Convert an RGB image to pure 1-bit black-and-white (no dithering)."""
+    img = img.convert("L")
+    img = img.point(lambda px: 255 if px > 128 else 0)
+    img = img.convert("1")
+    return img.convert("RGB", dither=None)
+
+
 def make_image(station: dict, index: int) -> None:
+    """Render a text-only BMP (original behaviour)."""
     name: str = station["name"]
-    # Use explicit newlines if present; otherwise split on spaces for auto-wrap
     render_text = name if "\n" in name else name.replace(" ", "\n")
 
     img = Image.new("RGB", (IMG_W, IMG_H), color=(255, 255, 255))
@@ -140,15 +163,100 @@ def make_image(station: dict, index: int) -> None:
     y = (IMG_H - th) // 2 - bbox[1]
     draw.multiline_text((x, y), render_text, font=font, fill=(0, 0, 0), align="center")
 
-    # Convert to pure 1-bit (no dithering), then back to RGB for BMP save
-    img = img.convert("L")
-    img = img.point(lambda px: 255 if px > 128 else 0)
-    img = img.convert("1")
-    img = img.convert("RGB", dither=None)
-
+    img = _to_bw(img)
     filename = os.path.join(OUTPUT_DIR, build_filename(index, station))
     img.save(filename, format="BMP")
     print(f"  saved → {filename}")
+
+
+def make_qr_image(station: dict, index: int) -> None:
+    """
+    Render a BMP with a QR code on the left and the station name on the right.
+
+    Layout (all values in pixels):
+      ┌──────────────────────────────────────────┐
+      │  pad  │  QR (147×147)  │ gap │  text col │  pad  │
+      └──────────────────────────────────────────┘
+
+    QR spec: Version 6, EC-M, 3 px/module, 4-module quiet zone → 147×147 px
+    Text column width: 264 − 12 − 147 − 8 − 12 = 85 px
+    """
+    name: str = station["name"]
+    url: str = station["qr"]
+    render_text = name if "\n" in name else name.replace(" ", "\n")
+
+    # ── Build QR code image ──────────────────────────────────────────────────
+    # Capacity for Version 6 / EC-M per encoding mode.
+    # The library picks the most efficient mode automatically after add_data().
+    _QR_CAPACITY: dict[int, tuple[int, str, str]] = {
+        # mode constant → (max chars/bytes, unit label, mode name)
+        qrcode.util.MODE_NUMBER: (255, "digits", "numeric"),
+        qrcode.util.MODE_ALPHA_NUM: (154, "characters", "alphanumeric"),
+        qrcode.util.MODE_8BIT_BYTE: (106, "bytes", "byte"),
+    }
+
+    qr = qrcode.QRCode(
+        version=QR_VERSION,
+        error_correction=ERROR_CORRECT_M,
+        box_size=QR_BOX_SIZE,
+        border=QR_BORDER,
+    )
+    qr.add_data(url)
+
+    # Inspect mode chosen by the library (set during add_data, before make)
+    mode_const = qr.data_list[0].mode if qr.data_list else qrcode.util.MODE_8BIT_BYTE
+    cap, unit, mode_name = _QR_CAPACITY.get(mode_const, (106, "bytes", "byte"))
+    data_len = (
+        len(url.encode("utf-8"))
+        if mode_const == qrcode.util.MODE_8BIT_BYTE
+        else len(url)
+    )
+
+    try:
+        qr.make(fit=False)  # force exact version; raises if data overflows v6/EC-M
+    except qrcode.exceptions.DataOverflowError:
+        print(
+            f"  SKIP  '{station['name']}' — QR data too long for "
+            f"v{QR_VERSION}/EC-M ({data_len} {unit} in {mode_name} mode, "
+            f"max {cap}).\n"
+            f"          Mode limits for v{QR_VERSION}/EC-M: "
+            f"numeric=255 digits · alphanumeric=154 chars · byte=106 bytes\n"
+            f"          Data: {url!r}"
+        )
+        return
+    qr_img = qr.make_image(fill_color="black", back_color="white").convert("RGB")
+
+    actual_qr_size = qr_img.size[0]  # square; should equal QR_SIZE (147)
+
+    # ── Compose canvas ───────────────────────────────────────────────────────
+    img = Image.new("RGB", (IMG_W, IMG_H), color=(255, 255, 255))
+    draw = ImageDraw.Draw(img)
+
+    # Paste QR, centred vertically
+    qr_x = PADDING
+    qr_y = (IMG_H - actual_qr_size) // 2
+    img.paste(qr_img, (qr_x, qr_y))
+
+    # ── Fit text into the remaining column ──────────────────────────────────
+    text_x = PADDING + actual_qr_size + QR_COL_GAP
+    text_w = IMG_W - text_x - PADDING  # 264 − 167 − 12 = 85 px
+    text_h = IMG_H - 2 * PADDING  # 152 px
+
+    font_path = find_font()
+    font = fit_font(draw, render_text, text_w, text_h, font_path)
+
+    bbox = draw.multiline_textbbox((0, 0), render_text, font=font, align="center")
+    tw, th = bbox[2] - bbox[0], bbox[3] - bbox[1]
+    tx = text_x + (text_w - tw) // 2 - bbox[0]
+    ty = (IMG_H - th) // 2 - bbox[1]
+    draw.multiline_text(
+        (tx, ty), render_text, font=font, fill=(0, 0, 0), align="center"
+    )
+
+    img = _to_bw(img)
+    filename = os.path.join(OUTPUT_DIR, build_filename(index, station))
+    img.save(filename, format="BMP")
+    print(f"  saved → {filename} (QR Code)")
 
 
 def main() -> None:
@@ -156,7 +264,10 @@ def main() -> None:
     os.makedirs(OUTPUT_DIR, exist_ok=True)
     print(f"Generating {len(stations)} image(s) from '{STATIONS_FILE}' …")
     for i, station in enumerate(stations):
-        make_image(station, i)
+        if station.get("qr"):
+            make_qr_image(station, i)
+        else:
+            make_image(station, i)
     print("Done.")
 
 
